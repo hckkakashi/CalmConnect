@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBV1TTLe_yEKwARt5GiizxFffm0dblv68I",
   authDomain: "mentalhealthchat-4fe3d.firebaseapp.com",
@@ -12,16 +13,20 @@ const firebaseConfig = {
   measurementId: "G-9EHZF5K3KJ"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Gemini API key
 const GEMINI_API_KEY = "AIzaSyBSXzOaGJFn9hez2ecDVM-s_HsXtglQ_Ug";
 
+// Toggle chatbot popup
 function toggleChatbot() {
   const popup = document.getElementById("chatbot-popup");
   popup.style.display = popup.style.display === "block" ? "none" : "block";
 }
 
+// Append messages to chat
 function appendMessage(sender, text, containerId = "chat-box") {
   const chatBox = document.getElementById(containerId);
   const msg = document.createElement("div");
@@ -32,6 +37,7 @@ function appendMessage(sender, text, containerId = "chat-box") {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Send message to Gemini
 async function sendMessage() {
   const input = document.getElementById("user-input");
   const userText = input.value.trim();
@@ -67,12 +73,14 @@ async function sendMessage() {
   }
 }
 
-const badWords = ["badword1", "badword2", "Shit", "damn"]; 
+// Basic bad word filter
+const badWords = ["badword1", "badword2", "shit", "damn"];
 function containsBadWords(text) {
   const lower = text.toLowerCase();
   return badWords.some(word => lower.includes(word));
 }
 
+// Send message in community chat
 function sendCommunityMessage() {
   const input = document.getElementById("community-input");
   const text = input.value.trim();
@@ -92,6 +100,7 @@ function sendCommunityMessage() {
   input.value = "";
 }
 
+// Listen and display messages from community chat
 onValue(ref(db, "messages"), (snapshot) => {
   const chatBox = document.getElementById("chat-messages");
   chatBox.innerHTML = "";
@@ -106,6 +115,7 @@ onValue(ref(db, "messages"), (snapshot) => {
   chatBox.scrollTop = chatBox.scrollHeight;
 });
 
+// Submit anonymous story
 function submitStory() {
   const storyInput = document.getElementById("story-input");
   const story = storyInput.value.trim();
@@ -124,12 +134,40 @@ function submitStory() {
     time: Date.now(),
     user: "Anonymous"
   });
+
   confirmDiv.textContent = "Thank you for sharing your story anonymously.";
   storyInput.value = "";
 
   setTimeout(() => (confirmDiv.textContent = ""), 5000);
 }
 
+// Display submitted stories
+onValue(ref(db, "stories"), (snapshot) => {
+  const storyList = document.getElementById("story-list");
+  if (!storyList) return;
+
+  storyList.innerHTML = "";
+  snapshot.forEach(childSnapshot => {
+    const story = childSnapshot.val();
+    const time = new Date(story.time).toLocaleDateString();
+
+    const storyDiv = document.createElement("div");
+    storyDiv.classList.add("story-item");
+    storyDiv.style.border = "1px solid #ccc";
+    storyDiv.style.padding = "10px";
+    storyDiv.style.marginBottom = "10px";
+    storyDiv.style.borderRadius = "5px";
+    storyDiv.style.backgroundColor = "#f9faff";
+
+    storyDiv.innerHTML = `
+      <p>${story.text}</p>
+      <small>🕒 ${time}</small>
+    `;
+    storyList.appendChild(storyDiv);
+  });
+});
+
+// Make functions available to HTML buttons
 window.sendMessage = sendMessage;
 window.sendCommunityMessage = sendCommunityMessage;
 window.toggleChatbot = toggleChatbot;

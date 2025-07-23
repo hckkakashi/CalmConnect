@@ -127,3 +127,20 @@ button {
   border-radius: 6px;
   margin-bottom: 10px;
 }
+.story-list {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #e6f0ff;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.story-item p {
+  margin: 0 0 5px 0;
+  font-style: italic;
+  color: #333;
+}
+
+.story-item small {
+  color: #555;
+}
